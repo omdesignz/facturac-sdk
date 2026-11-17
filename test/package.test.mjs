@@ -57,6 +57,23 @@ test('packed SDK installs offline with public exports, types and no application 
             ],
             { cwd: directory, env: environment, stdio: 'pipe' },
         );
+        const demoOutput = execFileSync(
+            process.execPath,
+            [
+                join(
+                    directory,
+                    'node_modules/@vapsolucoes.ao/facturac/examples/export-documents.mjs',
+                ),
+                '--demo',
+                join(directory, 'demo.csv'),
+            ],
+            { cwd: directory, stdio: 'pipe', encoding: 'utf8' },
+        );
+        assert.match(demoOutput, /DEMO.*Exported 2 documents/);
+        assert.match(
+            readFileSync(join(directory, 'demo.csv'), 'utf8'),
+            /FT DEMO/,
+        );
         const consumer = `import { Facturac } from '${manifest.name}';
 import type { Service } from '${manifest.name}';
 const id = '01J00000000000000000000000';

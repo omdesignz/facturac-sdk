@@ -8,6 +8,72 @@ npm install @vapsolucoes.ao/facturac
 
 The published package is [`@vapsolucoes.ao/facturac`](https://www.npmjs.com/package/@vapsolucoes.ao/facturac). This repository contains the SDK only. The Facturac application, credential management, and API implementation live in [omdesignz/facturac-ao](https://github.com/omdesignz/facturac-ao).
 
+## Try an integration in five minutes
+
+This repository includes a document-register CSV export and a local demo. No account, credentials, server, or network connection is needed after installing build dependencies:
+
+```sh
+git clone https://github.com/omdesignz/facturac-sdk.git
+cd facturac-sdk
+npm ci
+npm run build
+node examples/export-documents.mjs --demo /tmp/facturac-demo.csv
+```
+
+Expected output: `DEMO — synthetic data. Exported 2 documents.` On Windows, use a writable destination such as `facturac-demo.csv`. Choose a new filename on each run: existing exports are never overwritten. Open the CSV or import it into a staging table in your accounting/reporting system, treating public IDs and document numbers as text and amounts as integer minor units.
+
+The demo exercises the real SDK, including two-page pagination, through an injected synthetic transport. It never falls back to network requests and ignores live credentials. It supports document listing only. It does not simulate authentication, rate limits, writes, AGT validation, or the full API. Its synthetic homologation records do not establish a hosted sandbox or production readiness.
+
+### Connect the export to your deployment
+
+1. Ask your deployment administrator to enable external reads after the deployment checks. The API implementation and integration management must be deployed; installing this SDK does not deploy them.
+2. In **Definições → Integrações e API**, create an integration with only `documents:read`. Copy its workspace ID, legal-entity ID, environment, and one-time token into server-side secret configuration. The sponsoring owner/admin needs verified email, MFA, and a plan that includes integrations.
+3. Supply all five environment variables below through your secret manager or an untracked environment file. Use the actual deployment's HTTPS origin, without `/api`. Never put a token in command-line arguments or committed files.
+4. Run the same exporter with explicit `--live` mode and a new destination.
+
+```text
+FACTURAC_BASE_URL=https://your-deployment.example
+FACTURAC_TOKEN=<one-time integration credential>
+FACTURAC_WORKSPACE_ID=<public workspace ULID>
+FACTURAC_ENTITY_ID=<public legal-entity ULID>
+FACTURAC_ENVIRONMENT=production
+```
+
+```sh
+# With variables already supplied to the process:
+node examples/export-documents.mjs --live /secure/exports/documents-001.csv
+# Node 20.6+ can also load an untracked file:
+node --env-file=.env examples/export-documents.mjs --live /secure/exports/documents-002.csv
+```
+
+The destination directory must already exist and support hard links. The exporter writes a temporary file beside the destination, then exposes the completed export without replacing an existing file. Failures remove the temporary file; a forced process kill may leave a `.partial` file that must not be imported. File permissions are restricted to the owner on POSIX. Keep live exports in protected storage outside source control.
+
+### What this export means
+
+This is a document register for reconciliation and custom import adapters, not a complete ledger, SAF-T file, tax return, or certified fiscal export. The read API does not include dates, customer identities, tax breakdowns, or line items. No particular accounting vendor's import format is claimed.
+
+Columns are `public_id`, `document_no`, `document_type`, `environment`, `revision`, `currency_code`, `gross_total_minor`, and `issue_status`. Null document numbers become empty CSV cells. Amounts remain integer minor units; unsafe JavaScript integers fail the export. Do not sum different currencies. Legacy AGT status is intentionally excluded; use the qualified status endpoint when your workflow needs that evidence.
+
+Use workspace + legal entity + environment + public ID as the destination identity. Upsert by identity, retaining revision for reconciliation. The full register includes drafts and other statuses; apply your own posting rules rather than treating every row as revenue. Pagination is not a consistent snapshot and exposes no updated-since cursor. Reconcile repeated runs, handle changes during export, and never infer deletion from a missing row alone.
+
+CSV fields are quoted and formula-like text is rejected, following the threat described by [OWASP](https://community.owasp.org/attacks/CSV_Injection). Import identifiers as text; spreadsheet edits and re-saving can change their representation. A failed export should not be imported.
+
+### Sandbox and common failures
+
+For testing against a real server, arrange a separate test deployment with synthetic data and credentials issued for its exact environment. `homologation` currently supports document reads and qualified AGT status, but does not provide production customers, catalogue, billing summaries, or write commands. Choosing that environment does not create test data or provision a sandbox.
+
+| Result        | Next step                                                                                                           |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 401           | Check the credential, its expiry and revocation state.                                                              |
+| 403           | Check scope, workspace/entity/environment binding, sponsoring user's access and integration entitlement.            |
+| 404           | Check the deployed API routes and public record ID; an unavailable or foreign record can also return 404.           |
+| 422           | Check query values against the bundled contract.                                                                    |
+| 429           | Respect `Retry-After`; retry later with a new export filename.                                                      |
+| 503           | Ask the operator to check feature flags, shared cache, audit storage, and deployment readiness.                     |
+| Local failure | Check required variables, HTTPS origin, destination permissions, existing files and invalid/unsafe document values. |
+
+The exporter logs status/code/request identifiers for API failures, never the credential or response body. It does not retry automatically. Use `Ctrl+C` to cancel; do not import `.partial` files.
+
 ## Quickstart
 
 Create an integration in Facturac under **Definições → Integrações e API**. Copy its workspace ID, legal-entity ID, environment, and one-time credential into your server's secret configuration. The deployment must enable the relevant external API and your plan must include integrations.
