@@ -1,6 +1,6 @@
 {
     "name": "@vapsolucoes.ao/facturac",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Server-side JavaScript and TypeScript client for the Facturac integration API",
     "type": "module",
     "main": "./dist/index.js",
