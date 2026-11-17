@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { randomUUID } from 'node:crypto';
 import { link, open, unlink } from 'node:fs/promises';
 import { realpathSync } from 'node:fs';
@@ -5,6 +6,15 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { Facturac, FacturacError } from '@vapsolucoes.ao/facturac';
 import { createDemoClient } from './demo-client.mjs';
+
+const usage = `Usage: facturac-export --demo|--live /path/to/new-register.csv
+
+--demo  Export two synthetic documents without credentials or network calls.
+--live  Export from the deployment configured by FACTURAC_BASE_URL, FACTURAC_TOKEN,
+        FACTURAC_WORKSPACE_ID, FACTURAC_ENTITY_ID and FACTURAC_ENVIRONMENT.
+--help  Show this help.
+
+The destination directory must exist. Existing files are never overwritten.`;
 
 const fields = [
     'public_id',
@@ -82,12 +92,14 @@ export async function main(
     args = process.argv.slice(2),
     environment = process.env,
 ) {
+    if (args.length === 1 && args[0] === '--help') {
+        console.log(usage);
+        return;
+    }
     const demo = args[0] === '--demo';
     const live = args[0] === '--live';
     if ((!demo && !live) || args.length !== 2) {
-        throw new Error(
-            'Usage: node examples/export-documents.mjs --demo|--live /path/to/new-register.csv',
-        );
+        throw new Error(usage);
     }
     let client;
     if (demo) {
@@ -148,6 +160,7 @@ if (
                 'Export failed. Check arguments, required configuration, destination permissions, cancellation and document values. Existing exports were not overwritten.',
             );
         }
+        console.error('Run facturac-export --help for usage.');
         process.exitCode = 1;
     });
 }

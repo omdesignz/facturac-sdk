@@ -10,17 +10,23 @@ The published package is [`@vapsolucoes.ao/facturac`](https://www.npmjs.com/pack
 
 ## Try an integration in five minutes
 
-This repository includes a document-register CSV export and a local demo. No account, credentials, server, or network connection is needed after installing build dependencies:
+The npm package includes a document-register CSV export and a local demo. Run it with Node.js 20 or later:
 
 ```sh
-git clone https://github.com/omdesignz/facturac-sdk.git
-cd facturac-sdk
-npm ci
-npm run build
-node examples/export-documents.mjs --demo /tmp/facturac-demo.csv
+npm exec --yes --package=@vapsolucoes.ao/facturac@0.2.0 -- facturac-export --demo ./facturac-demo.csv
 ```
 
-Expected output: `DEMO — synthetic data. Exported 2 documents.` On Windows, use a writable destination such as `facturac-demo.csv`. Choose a new filename on each run: existing exports are never overwritten. Open the CSV or import it into a staging table in your accounting/reporting system, treating public IDs and document numbers as text and amounts as integer minor units.
+npm downloads the package on the first run. The demo itself needs no account, credentials, server, or network connection. No repository clone or build is required. Expected output: `DEMO — synthetic data. Exported 2 documents.`
+
+For repeated use, install it in your integration project:
+
+```sh
+npm install @vapsolucoes.ao/facturac@^0.2.0
+npm exec --offline -- facturac-export --help
+npm exec --offline -- facturac-export --demo ./facturac-demo-002.csv
+```
+
+Choose a new filename on each run: existing exports are never overwritten. Open the CSV or import it into a staging table in your accounting/reporting system, treating public IDs and document numbers as text and amounts as integer minor units.
 
 The demo exercises the real SDK, including two-page pagination, through an injected synthetic transport. It never falls back to network requests and ignores live credentials. It supports document listing only. It does not simulate authentication, rate limits, writes, AGT validation, or the full API. Its synthetic homologation records do not establish a hosted sandbox or production readiness.
 
@@ -41,9 +47,9 @@ FACTURAC_ENVIRONMENT=production
 
 ```sh
 # With variables already supplied to the process:
-node examples/export-documents.mjs --live /secure/exports/documents-001.csv
+npm exec --offline -- facturac-export --live /secure/exports/documents-001.csv
 # Node 20.6+ can also load an untracked file:
-node --env-file=.env examples/export-documents.mjs --live /secure/exports/documents-002.csv
+node --env-file=.env node_modules/@vapsolucoes.ao/facturac/examples/export-documents.mjs --live /secure/exports/documents-002.csv
 ```
 
 The destination directory must already exist and support hard links. The exporter writes a temporary file beside the destination, then exposes the completed export without replacing an existing file. Failures remove the temporary file; a forced process kill may leave a `.partial` file that must not be imported. File permissions are restricted to the owner on POSIX. Keep live exports in protected storage outside source control.
@@ -179,6 +185,7 @@ cd facturac-sdk
 npm ci
 npm test
 npm run format:check
+node examples/export-documents.mjs --demo /tmp/facturac-source-demo.csv
 npm pack
 ```
 
