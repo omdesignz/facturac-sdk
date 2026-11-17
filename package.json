@@ -1,0 +1,52 @@
+{
+    "name": "@vapsolucoes.ao/facturac",
+    "version": "0.1.0",
+    "description": "Server-side JavaScript and TypeScript client for the Facturac integration API",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "files": [
+        "dist",
+        "examples"
+    ],
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "generate": "node generate.mjs",
+        "build": "npm run generate && tsc -p tsconfig.json",
+        "test": "npm run build && node --test test/*.test.mjs",
+        "prepack": "npm run build",
+        "format:check": "prettier --check src test examples generate.mjs package.json tsconfig.json README.md .github/workflows/ci.yml"
+    },
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/omdesignz/facturac-sdk.git"
+    },
+    "homepage": "https://github.com/omdesignz/facturac-sdk#readme",
+    "bugs": {
+        "url": "https://github.com/omdesignz/facturac-sdk/issues"
+    },
+    "keywords": [
+        "facturac",
+        "angola",
+        "invoicing",
+        "api",
+        "sdk",
+        "typescript"
+    ],
+    "devDependencies": {
+        "prettier": "3.9.6",
+        "typescript": "5.9.3"
+    }
+}
