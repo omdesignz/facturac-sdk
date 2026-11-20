@@ -1,5 +1,19 @@
-import type { Agt, Billing, Customer, Read, Service } from './contracts.js';
-export type { Agt, Billing, Customer, Read, Service } from './contracts.js';
+import type {
+    Agt,
+    Billing,
+    Customer,
+    DocumentIssue,
+    Read,
+    Service,
+} from './contracts.js';
+export type {
+    Agt,
+    Billing,
+    Customer,
+    DocumentIssue,
+    Read,
+    Service,
+} from './contracts.js';
 
 export interface FacturacOptions {
     /** HTTPS origin of your Facturac deployment. No API path. */
@@ -102,6 +116,17 @@ export class Facturac {
     }
 
     readonly documents = {
+        issue: (
+            data: DocumentIssue.DocumentIssueRequest,
+            options: CommandOptions,
+        ) =>
+            this.#request<DocumentIssue.DocumentIssueResult>(
+                'commands/v1',
+                'documents',
+                {},
+                options,
+                data,
+            ),
         list: (
             query: Read.externalListFiscalDocumentsQuery = {},
             options: RequestOptions = {},
