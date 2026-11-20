@@ -548,3 +548,60 @@ export namespace Service {
     export type externalCatalogueServiceCreateV1Response =
         CatalogueServiceCreateResult;
 }
+export namespace DocumentIssue {
+    export type PublicId = string;
+    export type DocumentIssueRequest =
+        InvoiceRequest | InvoiceReceiptRequest | CreditNoteRequest;
+    export type InvoiceRequest = {
+        document_type: 'FT';
+        customer_public_id: PublicId;
+        notes?: string;
+        lines: Array<SaleLine>;
+        expected_total_minor: string;
+    };
+    export type InvoiceReceiptRequest = {
+        document_type: 'FR';
+        customer_public_id?: PublicId;
+        payment_method:
+            'NU' | 'CH' | 'CD' | 'CC' | 'CO' | 'TB' | 'DE' | 'CS' | 'LC' | 'OU';
+        notes?: string;
+        lines: Array<SaleLine>;
+        expected_total_minor: string;
+    };
+    export type CreditNoteRequest = {
+        document_type: 'NC';
+        references_document_public_id: PublicId;
+        reason: string;
+        lines: Array<{ line_number: number; quantity: string }>;
+        expected_total_minor: string;
+    };
+    export type SaleLine =
+        | {
+              catalogue_item_public_id: PublicId;
+              quantity: string;
+              discount_percentage?: string;
+          }
+        | {
+              description: string;
+              unit_price_minor: string;
+              tax_treatment:
+                  'IVA_NOR_14' | 'IVA_ISE_M00' | 'NS_M02' | 'IVA_ISE_M04';
+              service?: boolean;
+              quantity: string;
+              discount_percentage?: string;
+          };
+    export type DocumentIssueResult = {
+        data: { public_id: PublicId };
+        meta: { operation_id: string };
+    };
+    export type Error = {
+        error: {
+            code: string;
+            message: string;
+            fields?: { [key: string]: string };
+        };
+        meta: { request_id: string };
+    };
+    export type externalDocumentIssueV1Query = Record<string, never>;
+    export type externalDocumentIssueV1Response = DocumentIssueResult;
+}

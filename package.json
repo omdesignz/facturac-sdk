@@ -1,6 +1,6 @@
 {
     "name": "@vapsolucoes.ao/facturac",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Server-side JavaScript and TypeScript client for the Facturac integration API",
     "type": "module",
     "main": "./dist/index.js",
@@ -50,6 +50,7 @@
         "typescript": "5.9.3"
     },
     "bin": {
-        "facturac-export": "examples/export-documents.mjs"
+        "facturac-export": "examples/export-documents.mjs",
+        "facturac-issue-demo": "examples/issue-documents.mjs"
     }
 }

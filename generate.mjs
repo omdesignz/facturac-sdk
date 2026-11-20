@@ -7,6 +7,7 @@ const contracts = {
     Agt: 'openapi-external-qualified-agt-v2.json',
     Customer: 'openapi-external-customer-create-v1.json',
     Service: 'openapi-external-catalogue-service-create-v1.json',
+    DocumentIssue: 'openapi-external-document-issue-v1.json',
 };
 
 function type(schema) {
